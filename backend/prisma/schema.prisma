@@ -1,0 +1,461 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum SagTier {
+  BASIC_THEATRICAL
+  LOW_BUDGET
+  MODERATE_LOW_BUDGET
+  ULTRA_LOW
+  NON_UNION
+}
+
+enum UnionStatus {
+  SAG_AFTRA
+  NON_UNION
+  TAFT_HARTLEY
+}
+
+enum ContractType {
+  DAY_PLAYER
+  WEEKLY
+  WEEKLY_GUARANTEED
+  RUN_OF_SHOW
+}
+
+enum RateUnit {
+  DAY
+  WEEK
+  FLAT
+}
+
+enum PhaseType {
+  DEVELOPMENT
+  PRE_PRODUCTION
+  PRODUCTION
+  POST_PRODUCTION
+  DELIVERY
+}
+
+enum PermitStatus {
+  SCOUTING
+  NEGOTIATING
+  APPLIED
+  PERMITTED
+  DENIED
+}
+
+enum BudgetCategory {
+  ABOVE_THE_LINE
+  BTL_PRODUCTION
+  BTL_POST
+  OTHER_DIRECT
+}
+
+enum Archetype {
+  HERO
+  SHADOW
+  MENTOR
+  TRICKSTER
+  HERALD
+  SHAPESHIFTER
+  GUARDIAN
+  ALLY
+}
+
+enum RelationshipType {
+  FRIEND
+  ENEMY
+  LOVER
+  MENTOR
+  RIVAL
+  FAMILY
+  COLLEAGUE
+  NEUTRAL
+}
+
+enum ArcTemplateType {
+  HEROS_JOURNEY
+  SAVE_THE_CAT
+  THREE_ACT
+  FREYTAGS_PYRAMID
+  SHAKESPEAREAN_FIVE_ACT
+}
+
+enum DistributionType {
+  THEATRICAL
+  STREAMING
+  FESTIVAL
+  DIRECT
+}
+
+// ─── Reference Tables (Seeded, Read-Only for Users) ───────────────────────────
+
+model SagRateTable {
+  id                  String   @id @default(cuid())
+  tier                SagTier  @unique
+  budgetMin           Float?   // null = no lower bound (Ultra Low)
+  budgetMax           Float?   // null = no upper bound (Basic)
+  dayRateMin          Float
+  weeklyRateMin       Float?
+  phFringePctPrincipals Float  @default(21.0)
+  phFringePctBackground Float  @default(20.5)
+  mealPenalty1        Float    @default(25.0)  // First 30 min overage
+  mealPenalty2        Float    @default(35.0)  // Second 30 min overage
+  mealPenaltyEach     Float    @default(50.0)  // Each subsequent
+  perDiemAmount       Float    @default(70.0)  // Per overnight day
+  weekendMultiplier   Float    @default(2.0)
+  otMultiplier1       Float    @default(1.5)   // Hours 8–12
+  otMultiplier2       Float    @default(2.0)   // 12+ hours
+  effectiveFrom       DateTime
+  effectiveTo         DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("sag_rate_tables")
+}
+
+model NonUnionRateBenchmark {
+  id             String  @id @default(cuid())
+  roleCategory   String
+  dayRateMin     Float
+  dayRateMax     Float
+  weeklyRateMin  Float?
+  weeklyRateMax  Float?
+  market         String  @default("NYC")
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("non_union_rate_benchmarks")
+}
+
+// ─── Core Project Models ───────────────────────────────────────────────────────
+
+model Project {
+  id                String           @id @default(cuid())
+  clerkUserId       String
+  title             String
+  format            String           // "Feature Film", "Short", "TV Pilot"
+  genre             String?
+  year              Int?
+  totalBudget       Float
+  sagAgreementTier  SagTier          @default(NON_UNION)
+  distributionType  DistributionType @default(THEATRICAL)
+  contingencyPct    Float            @default(10.0)
+  logline           String?
+  notes             String?
+  isDemo            Boolean          @default(false)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Relations
+  phases            Phase[]
+  persons           Person[]
+  departments       Department[]
+  budgetLineItems   BudgetLineItem[]
+  characters        Character[]
+  locations         Location[]
+  arcBeats          ArcBeat[]
+  storyboardShots   StoryboardShot[]
+  colorPalettes     ColorPalette[]
+
+  @@index([clerkUserId])
+  @@map("projects")
+}
+
+model Department {
+  id          String      @id @default(cuid())
+  projectId   String
+  name        String
+  unionStatus UnionStatus @default(NON_UNION)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  persons     Person[]
+
+  @@index([projectId])
+  @@map("departments")
+}
+
+model Phase {
+  id          String    @id @default(cuid())
+  projectId   String
+  type        PhaseType
+  name        String
+  startDate   DateTime?
+  endDate     DateTime?
+  shootDays   Int       @default(0)
+  color       String    @default("#6366f1")
+  order       Int       @default(0)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  project          Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  crewAssignments  PhaseCrewAssignment[]
+
+  @@index([projectId])
+  @@map("phases")
+}
+
+model PhaseCrewAssignment {
+  id        String   @id @default(cuid())
+  phaseId   String
+  personId  String
+  role      String?
+  createdAt DateTime @default(now())
+
+  phase   Phase  @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  person  Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([phaseId, personId])
+  @@map("phase_crew_assignments")
+}
+
+model Person {
+  id                String       @id @default(cuid())
+  projectId         String
+  departmentId      String?
+  name              String
+  role              String
+  unionStatus       UnionStatus  @default(NON_UNION)
+  contractType      ContractType @default(DAY_PLAYER)
+  negotiatedRate    Float
+  guaranteedUnits   Float        @default(1.0)  // days or weeks
+  rateUnit          RateUnit     @default(DAY)
+  phFringePct       Float        @default(0.0)   // auto-filled from SagRateTable
+  phFringeAmount    Float        @default(0.0)   // auto-calculated
+  belowSagMinimum   Boolean      @default(false) // red flag
+  notes             String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  project          Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  department       Department?           @relation(fields: [departmentId], references: [id])
+  character        Character?
+  budgetLineItems  BudgetLineItem[]
+  phaseAssignments PhaseCrewAssignment[]
+  perDiemEntries   PerDiemEntry[]
+  mealPenalties    MealPenalty[]
+
+  @@index([projectId])
+  @@map("persons")
+}
+
+// ─── Budget Models ─────────────────────────────────────────────────────────────
+
+model BudgetLineItem {
+  id                  String         @id @default(cuid())
+  projectId           String
+  personId            String?
+  locationId          String?
+  category            BudgetCategory
+  description         String
+  baseAmount          Float          @default(0.0)
+  phFringeAmount      Float          @default(0.0)
+  mealPenaltiesTotal  Float          @default(0.0)
+  perDiemTotal        Float          @default(0.0)
+  otherAmount         Float          @default(0.0)
+  lineTotal           Float          @default(0.0)  // sum of all above
+  isLocked            Boolean        @default(false)
+  notes               String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  person    Person?    @relation(fields: [personId], references: [id])
+  location  Location?  @relation(fields: [locationId], references: [id])
+
+  @@index([projectId])
+  @@index([category])
+  @@map("budget_line_items")
+}
+
+model PerDiemEntry {
+  id         String   @id @default(cuid())
+  personId   String
+  locationId String?
+  date       DateTime
+  amount     Float    @default(70.0)
+  createdAt  DateTime @default(now())
+
+  person     Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  location   Location? @relation(fields: [locationId], references: [id])
+
+  @@index([personId])
+  @@map("per_diem_entries")
+}
+
+model MealPenalty {
+  id             String   @id @default(cuid())
+  personId       String
+  shootDate      DateTime
+  intervalNumber Int      // 1, 2, 3+ 
+  amount         Float    // $25, $35, or $50
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([personId])
+  @@map("meal_penalties")
+}
+
+// ─── Character Studio ──────────────────────────────────────────────────────────
+
+model Character {
+  id          String     @id @default(cuid())
+  projectId   String
+  personId    String?    @unique   // links to cast member
+  name        String
+  archetype   Archetype?
+  logline     String?
+  backstory   String?
+  want        String?    // external goal
+  need        String?    // internal need
+  flaw        String?
+  wound       String?    // psychological wound
+  ghost       String?    // past trauma haunting them
+  arcPct      Float      @default(0.0)   // arc completion 0–100
+  colorHex    String?    @default("#6366f1")
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  project              Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  person               Person?               @relation(fields: [personId], references: [id])
+  relationshipsFrom    CharacterRelationship[] @relation("FromCharacter")
+  relationshipsTo      CharacterRelationship[] @relation("ToCharacter")
+
+  @@index([projectId])
+  @@map("characters")
+}
+
+model CharacterRelationship {
+  id               String           @id @default(cuid())
+  fromCharacterId  String
+  toCharacterId    String
+  relationshipType RelationshipType
+  description      String?
+  strength         Int              @default(5)  // 1–10 edge weight for graph
+  createdAt        DateTime         @default(now())
+
+  fromCharacter Character @relation("FromCharacter", fields: [fromCharacterId], references: [id], onDelete: Cascade)
+  toCharacter   Character @relation("ToCharacter", fields: [toCharacterId], references: [id], onDelete: Cascade)
+
+  @@unique([fromCharacterId, toCharacterId])
+  @@map("character_relationships")
+}
+
+// ─── Story Arc ─────────────────────────────────────────────────────────────────
+
+model ArcTemplate {
+  id          String          @id @default(cuid())
+  type        ArcTemplateType @unique
+  name        String
+  description String?
+  stages      Json            // Array of { name, description, typicalPositionPct }
+  createdAt   DateTime        @default(now())
+
+  @@map("arc_templates")
+}
+
+model ArcBeat {
+  id            String   @id @default(cuid())
+  projectId     String
+  arcTemplateId String?
+  name          String
+  positionPct   Float    // 0–100 timeline position
+  description   String?
+  notes         String?
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("arc_beats")
+}
+
+// ─── AI Storyboard ────────────────────────────────────────────────────────────
+
+model StoryboardShot {
+  id           String   @id @default(cuid())
+  projectId    String
+  sceneNumber  String
+  shotNumber   Int      @default(1)
+  shotType     String   // "Wide", "Close-Up", "Medium", "POV", etc.
+  description  String?
+  imageUrl     String?  // S3 URL
+  colorHex     String?
+  aiGenerated  Boolean  @default(false)
+  aiPrompt     String?
+  order        Int      @default(0)
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("storyboard_shots")
+}
+
+// ─── Location Scout ────────────────────────────────────────────────────────────
+
+model Location {
+  id           String       @id @default(cuid())
+  projectId    String
+  name         String
+  address      String?
+  lat          Float?
+  lng          Float?
+  permitStatus PermitStatus @default(SCOUTING)
+  dailyFee     Float        @default(0.0)
+  shootDays    Int          @default(0)
+  description  String?
+  photoUrls    String[]     // S3 URLs
+  contactName  String?
+  contactEmail String?
+  contactPhone String?
+  notes        String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  budgetLineItems BudgetLineItem[]
+  perDiemEntries  PerDiemEntry[]
+
+  @@index([projectId])
+  @@map("locations")
+}
+
+// ─── Color Psychology ──────────────────────────────────────────────────────────
+
+model ColorPalette {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  swatches  Json     // Array of { hex, emotion, productionCode, label }
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("color_palettes")
+}

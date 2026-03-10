@@ -1,0 +1,104 @@
+﻿src/middleware/auth.ts(49,43): error TS2339: Property 'verifyToken' does not exist on type 'ClerkClient'.
+src/routes/ai.ts(14,32): error TS2554: Expected 2-3 arguments, but got 1.
+src/routes/ai.ts(16,70): error TS2345: Argument of type '{ sceneContext: string; shotType: string; style?: string | undefined; characterColors?: Record<string, unknown> | undefined; }' is not assignable to parameter of type '{ sceneContext: string; shotType: string; style?: string | undefined; characterColors?: Record<string, string> | undefined; }'.
+  Types of property 'characterColors' are incompatible.
+    Type 'Record<string, unknown> | undefined' is not assignable to type 'Record<string, string> | undefined'.
+      Type 'Record<string, unknown>' is not assignable to type 'Record<string, string>'.
+        'string' index signatures are incompatible.
+          Type 'unknown' is not assignable to type 'string'.
+src/routes/arcTemplates.ts(58,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/arcTemplates.ts(68,48): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/budget.ts(57,83): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/budget.ts(63,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/budget.ts(73,55): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/budget.ts(89,66): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/budget.ts(94,13): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/characters.ts(47,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/characters.ts(72,68): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/characters.ts(80,50): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/characters.ts(103,62): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/colorPalettes.ts(54,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/colorPalettes.ts(64,53): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/locations.ts(42,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/locations.ts(78,66): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/locations.ts(99,49): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/locations.ts(111,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/locations.ts(122,77): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/locations.ts(124,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/locations.ts(144,82): error TS2322: Type '{ name: string; id: string; description: string | null; address: string | null; }[]' is not assignable to type '{ id: string; name: string; address?: string | undefined; description?: string | undefined; }[]'.
+  Type '{ name: string; id: string; description: string | null; address: string | null; }' is not assignable to type '{ id: string; name: string; address?: string | undefined; description?: string | undefined; }'.
+    Types of property 'address' are incompatible.
+      Type 'string | null' is not assignable to type 'string | undefined'.
+        Type 'null' is not assignable to type 'string | undefined'.
+src/routes/persons.ts(44,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/persons.ts(87,62): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/persons.ts(102,47): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/persons.ts(121,17): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/persons.ts(128,66): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/persons.ts(146,29): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/persons.ts(151,66): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/phases.ts(55,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/phases.ts(75,60): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/phases.ts(90,21): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/phases.ts(101,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | StringFilter<"PhaseCrewAssignment"> | undefined'.
+  Type 'string[]' is not assignable to type 'string | StringFilter<"PhaseCrewAssignment"> | undefined'.
+src/routes/phases.ts(101,46): error TS2322: Type 'string | string[]' is not assignable to type 'string | StringFilter<"PhaseCrewAssignment"> | undefined'.
+  Type 'string[]' is not assignable to type 'string | StringFilter<"PhaseCrewAssignment"> | undefined'.
+src/routes/projects.ts(42,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | StringFilter<"Project"> | undefined'.
+  Type 'string[]' is not assignable to type 'string | StringFilter<"Project"> | undefined'.
+src/routes/projects.ts(78,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | StringFilter<"Project"> | undefined'.
+  Type 'string[]' is not assignable to type 'string | StringFilter<"Project"> | undefined'.
+src/routes/projects.ts(94,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/projects.ts(105,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | StringFilter<"Project"> | undefined'.
+  Type 'string[]' is not assignable to type 'string | StringFilter<"Project"> | undefined'.
+src/routes/projects.ts(108,48): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/projects.ts(117,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | StringFilter<"Project"> | undefined'.
+  Type 'string[]' is not assignable to type 'string | StringFilter<"Project"> | undefined'.
+src/routes/projects.ts(120,78): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/projects.ts(129,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | StringFilter<"Project"> | undefined'.
+  Type 'string[]' is not assignable to type 'string | StringFilter<"Project"> | undefined'.
+src/routes/projects.ts(132,77): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/storyboard.ts(54,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/storyboard.ts(64,55): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/storyboard.ts(77,32): error TS2554: Expected 2-3 arguments, but got 1.
+src/routes/storyboard.ts(88,13): error TS2322: Type 'Record<string, unknown> | undefined' is not assignable to type 'Record<string, string> | undefined'.
+  Type 'Record<string, unknown>' is not assignable to type 'Record<string, string>'.
+    'string' index signatures are incompatible.
+      Type 'unknown' is not assignable to type 'string'.
+src/routes/upload.ts(29,38): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+  Type 'string[]' is not assignable to type 'string'.

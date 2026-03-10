@@ -1,0 +1,34 @@
+{
+  "name": "pocket-productions-backend",
+  "version": "1.0.0",
+  "description": "Pocket Productions — Film Production Management API",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:prod": "prisma migrate deploy",
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:reset": "prisma migrate reset --force && ts-node prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "db:push": "prisma db push",
+    "setup": "prisma generate && prisma migrate dev --name init && ts-node prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "keywords": [
+    "film",
+    "production",
+    "sag",
+    "budget"
+  ],
+  "author": "Pocket Productions",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "prisma": "^6.19.2"
+  }
+}
