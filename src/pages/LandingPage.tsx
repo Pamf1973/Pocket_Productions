@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { usePWAInstall } from '../hooks/usePWAInstall';
 
 const FEATURES = [
   {
@@ -33,32 +34,18 @@ const FEATURES = [
   },
 ];
 
-const SCREENS = [
-  {
-    label: 'Dashboard',
-    tag: 'Desktop',
-    color: '#257bf4',
-    icon: 'grid_view',
-    desc: 'Live production health, daily budget summary, and Gantt timeline in one view.',
-  },
-  {
-    label: 'Nexus Ops',
-    tag: 'Mobile',
-    color: '#ec5b13',
-    icon: 'videocam',
-    desc: 'Night-shoot command centre with live recording status and daily Gantt summary.',
-  },
-  {
-    label: 'Storyboard Studio',
-    tag: 'Mobile',
-    color: '#ec5b13',
-    icon: 'movie_filter',
-    desc: 'Shot-by-shot breakdown with AI generation, camera metadata, and add-next-shot flow.',
-  },
-];
-
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { deviceType, installPrompt, triggerInstall } = usePWAInstall();
+  const isMobile = deviceType === 'ios' || deviceType === 'android';
+
+  const handleInstallClick = async () => {
+    if (deviceType === 'android' && installPrompt) {
+      await triggerInstall();
+    } else {
+      navigate('/install');
+    }
+  };
 
   return (
     <div
@@ -90,14 +77,16 @@ export default function LandingPage() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/install')}
-            className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold border transition-colors"
-            style={{ borderColor: 'rgba(37,123,244,0.4)', color: '#257bf4', background: 'rgba(37,123,244,0.1)' }}
-          >
-            <span className="material-symbols-outlined text-[16px]">install_mobile</span>
-            Install App
-          </button>
+          {isMobile && (
+            <button
+              onClick={handleInstallClick}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold border transition-colors"
+              style={{ borderColor: 'rgba(37,123,244,0.4)', color: '#257bf4', background: 'rgba(37,123,244,0.1)' }}
+            >
+              <span className="material-symbols-outlined text-[16px]">install_mobile</span>
+              Install App
+            </button>
+          )}
           <button
             onClick={() => navigate('/dashboard')}
             className="px-4 py-2 rounded-lg text-sm font-black text-white transition-colors"
@@ -137,20 +126,22 @@ export default function LandingPage() {
 
         <div className="flex flex-wrap items-center justify-center gap-4">
           <button
-            onClick={() => navigate('/install')}
+            onClick={handleInstallClick}
             className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-black text-black transition-all hover:scale-105"
             style={{ background: 'linear-gradient(to right, #00B2FF, #257bf4)', boxShadow: '0 10px 30px rgba(0,178,255,0.3)' }}
           >
-            <span className="material-symbols-outlined text-[20px]">install_mobile</span>
-            Add to Home Screen
+            <span className="material-symbols-outlined text-[20px]">
+              {isMobile ? 'install_mobile' : 'smartphone'}
+            </span>
+            {isMobile ? 'Add to Home Screen' : 'Install on Phone'}
           </button>
           <button
             onClick={() => navigate('/dashboard')}
             className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold text-white border transition-all hover:bg-white/5"
             style={{ borderColor: 'rgba(255,255,255,0.15)' }}
           >
-            <span className="material-symbols-outlined text-[20px]">open_in_browser</span>
-            Try Desktop App
+            <span className="material-symbols-outlined text-[20px]">monitor</span>
+            Open Desktop App
           </button>
         </div>
 
