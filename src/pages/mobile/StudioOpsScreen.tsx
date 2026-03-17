@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BottomNav from '../../components/BottomNav';
 
 type StatusFilter = 'active' | 'preprod' | 'filming' | 'post';
 
@@ -86,13 +87,6 @@ const FILTERS: { id: StatusFilter; label: string }[] = [
   { id: 'preprod', label: 'Pre-Prod' },
   { id: 'filming', label: 'Filming' },
   { id: 'post', label: 'Post' },
-];
-
-const NAV_ITEMS = [
-  { label: 'Home', icon: 'home' },
-  { label: 'Projects', icon: 'group', active: true },
-  { label: 'Locs', icon: 'location_on' },
-  { label: 'Story', icon: 'auto_stories' },
 ];
 
 export default function StudioOpsScreen() {
@@ -214,35 +208,7 @@ export default function StudioOpsScreen() {
         ))}
       </main>
 
-      {/* Bottom Nav */}
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-background-light dark:bg-background-dark border-t border-primary/20 px-6 py-3 pb-8 flex justify-between items-center z-20">
-        {NAV_ITEMS.slice(0, 2).map((item, i) => (
-          <button
-            key={i}
-            className={`flex flex-col items-center gap-1 relative ${item.active ? 'text-primary' : 'text-slate-400'}`}
-          >
-            <span className="material-symbols-outlined">{item.icon}</span>
-            <span className="text-[10px] font-bold uppercase tracking-tighter">{item.label}</span>
-            {item.active && <div className="absolute -top-1 right-0 w-1.5 h-1.5 bg-primary rounded-full" />}
-          </button>
-        ))}
-
-        <div className="relative -top-6">
-          <button
-            onClick={() => navigate('/new-project')}
-            className="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-primary/40 border-4 border-background-light dark:border-background-dark"
-          >
-            <span className="material-symbols-outlined text-3xl">add</span>
-          </button>
-        </div>
-
-        {NAV_ITEMS.slice(2).map((item, i) => (
-          <button key={i} className="flex flex-col items-center gap-1 text-slate-400">
-            <span className="material-symbols-outlined">{item.icon}</span>
-            <span className="text-[10px] font-bold uppercase tracking-tighter">{item.label}</span>
-          </button>
-        ))}
-      </nav>
+      <BottomNav />
     </div>
   );
 }

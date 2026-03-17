@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BottomNav from '../../components/BottomNav';
 
 type BudgetTab = 'cast' | 'crew' | 'locations' | 'gear';
-type NavItem = 'home' | 'projects' | 'events' | 'locs' | 'story' | 'crew';
 
 interface CastMember {
   id: number;
@@ -55,19 +55,9 @@ const TABS: { id: BudgetTab; label: string }[] = [
   { id: 'gear', label: 'Gear' },
 ];
 
-const NAV_ITEMS: { id: NavItem; label: string; icon: string }[] = [
-  { id: 'home', label: 'Home', icon: 'dashboard' },
-  { id: 'projects', label: 'Projects', icon: 'folder_special' },
-  { id: 'events', label: 'Events', icon: 'calendar_month' },
-  { id: 'locs', label: 'Locs', icon: 'location_on' },
-  { id: 'story', label: 'Story', icon: 'menu_book' },
-  { id: 'crew', label: 'Crew', icon: 'group' },
-];
-
 export default function BudgetScreen() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<BudgetTab>('cast');
-  const [activeNav, setActiveNav] = useState<NavItem>('projects');
 
   return (
     <div className="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl overflow-x-hidden">
@@ -226,40 +216,7 @@ export default function BudgetScreen() {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-background-light dark:bg-background-dark border-t border-primary/20 px-6 py-3 pb-8 flex justify-between items-center z-30">
-        {NAV_ITEMS.slice(0, 3).map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveNav(item.id)}
-            className={`flex flex-col items-center gap-1 relative ${activeNav === item.id ? 'text-primary' : 'text-slate-400'}`}
-          >
-            <span className="material-symbols-outlined">{item.icon}</span>
-            <span className="text-[10px] font-bold uppercase tracking-tighter">{item.label}</span>
-            {item.id === 'projects' && (
-              <div className="absolute -top-1 right-0 w-1.5 h-1.5 bg-primary rounded-full" />
-            )}
-          </button>
-        ))}
-
-        {/* FAB */}
-        <div className="relative -top-6">
-          <button className="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-primary/40 border-4 border-background-light dark:border-background-dark">
-            <span className="material-symbols-outlined text-3xl">add</span>
-          </button>
-        </div>
-
-        {NAV_ITEMS.slice(3).map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveNav(item.id)}
-            className={`flex flex-col items-center gap-1 ${activeNav === item.id ? 'text-primary' : 'text-slate-400'}`}
-          >
-            <span className="material-symbols-outlined">{item.icon}</span>
-            <span className="text-[10px] font-bold uppercase tracking-tighter">{item.label}</span>
-          </button>
-        ))}
-      </nav>
+      <BottomNav />
     </div>
   );
 }

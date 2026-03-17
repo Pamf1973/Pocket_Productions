@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSession } from '../../utils/auth';
+import { getSession, signOut } from '../../utils/auth';
 
 const QUICK_ACTIONS = [
   { icon: 'layers', label: 'Assets', route: '/home' },
@@ -29,9 +30,15 @@ const ACTIVITY = [
 export default function MobileDashboard() {
   const navigate = useNavigate();
   const session = getSession();
+  const [showProfile, setShowProfile] = useState(false);
   const initials = session?.name
     ? session.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
     : 'PP';
+
+  const handleSignOut = () => {
+    signOut();
+    navigate('/login');
+  };
 
   return (
     <div
@@ -57,12 +64,13 @@ export default function MobileDashboard() {
               style={{ background: 'rgba(255,255,255,0.07)' }}>
               <span className="material-symbols-outlined text-slate-300 text-[20px]">notifications</span>
             </button>
-            <div
+            <button
+              onClick={() => setShowProfile(true)}
               className="size-9 rounded-full flex items-center justify-center text-white text-xs font-black"
               style={{ background: 'linear-gradient(135deg, #ec5b13, #c0410a)' }}
             >
               {initials}
-            </div>
+            </button>
           </div>
         </div>
       </header>
@@ -159,6 +167,55 @@ export default function MobileDashboard() {
           </div>
         </section>
       </main>
+
+      {/* Profile sheet */}
+      {showProfile && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/60 z-30"
+            onClick={() => setShowProfile(false)}
+          />
+          <div
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-40 rounded-t-3xl p-6 pb-10"
+            style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-6" />
+            <div className="flex items-center gap-4 mb-6">
+              <div
+                className="size-14 rounded-full flex items-center justify-center text-white text-lg font-black shrink-0"
+                style={{ background: 'linear-gradient(135deg, #ec5b13, #c0410a)' }}
+              >
+                {initials}
+              </div>
+              <div>
+                <p className="text-white font-bold text-base">{session?.name ?? 'Producer'}</p>
+                <p className="text-slate-400 text-sm">{session?.email ?? ''}</p>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400">
+                  {session?.role ?? 'Executive Producer'}
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2 mb-6">
+              <button
+                onClick={() => { setShowProfile(false); navigate('/settings-desktop'); }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-300 hover:text-white transition-colors"
+                style={{ background: 'rgba(255,255,255,0.05)' }}
+              >
+                <span className="material-symbols-outlined text-[20px] text-slate-400">settings</span>
+                Settings
+              </button>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm text-red-400 transition-all"
+              style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}
+            >
+              <span className="material-symbols-outlined text-[20px]">logout</span>
+              Sign Out
+            </button>
+          </div>
+        </>
+      )}
 
       {/* Bottom navigation */}
       <nav

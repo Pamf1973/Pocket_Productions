@@ -5,6 +5,7 @@ import LandingPage from './pages/LandingPage';
 
 // Auth
 import LoginScreen from './pages/LoginScreen';
+import SignUpScreen from './pages/SignUpScreen';
 import ProtectedRoute from './components/ProtectedRoute';
 import DeviceRoute from './components/DeviceRoute';
 
@@ -39,6 +40,7 @@ export default function App() {
       <Routes>
         {/* Auth */}
         <Route path="/login" element={<LoginScreen />} />
+        <Route path="/signup" element={<SignUpScreen />} />
 
         {/* Landing / PWA install */}
         <Route path="/" element={<LandingPage />} />

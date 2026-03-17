@@ -1,14 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const NAV_ITEMS = [
-  { label: 'Dash', icon: 'grid_view' },
-  { label: 'Projects', icon: 'movie', active: true },
-  { label: 'Events', icon: 'calendar_month' },
-  { label: 'Locs', icon: 'location_on' },
-  { label: 'Story', icon: 'auto_stories' },
-  { label: 'Assets/\nCrew', icon: 'group' },
-];
+import BottomNav from '../../components/BottomNav';
 
 export default function NewProjectScreen() {
   const navigate = useNavigate();
@@ -148,41 +140,7 @@ export default function NewProjectScreen() {
         </div>
       </main>
 
-      {/* Bottom Nav — wider with 7 items */}
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-background-light dark:bg-background-dark border-t border-primary/20 px-3 py-3 pb-8 flex justify-between items-center z-50">
-        {NAV_ITEMS.slice(0, 3).map((item, i) => (
-          <button
-            key={i}
-            className={`flex flex-col items-center gap-1 relative ${item.active ? 'text-primary' : 'text-slate-400 hover:text-primary'} transition-colors`}
-          >
-            <span className="material-symbols-outlined text-xl">{item.icon}</span>
-            <span className="text-[9px] font-bold uppercase tracking-tighter whitespace-pre-line text-center leading-[1.1]">
-              {item.label}
-            </span>
-            {item.active && (
-              <div className="absolute -top-1 right-0 w-1.5 h-1.5 bg-primary rounded-full" />
-            )}
-          </button>
-        ))}
-
-        <div className="relative -top-6 mx-1">
-          <button className="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-primary/40 border-4 border-background-light dark:border-background-dark active:scale-90 transition-transform">
-            <span className="material-symbols-outlined text-3xl">add</span>
-          </button>
-        </div>
-
-        {NAV_ITEMS.slice(3).map((item, i) => (
-          <button
-            key={i}
-            className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
-          >
-            <span className="material-symbols-outlined text-xl">{item.icon}</span>
-            <span className="text-[9px] font-bold uppercase tracking-tighter whitespace-pre-line text-center leading-[1.1]">
-              {item.label}
-            </span>
-          </button>
-        ))}
-      </nav>
+      <BottomNav onAdd={() => navigate('/projects')} />
     </div>
   );
 }
