@@ -1,19 +1,6 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { signIn } from '../utils/auth';
+import { SignIn } from '@clerk/clerk-react';
 
 export default function LoginScreen() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    signIn(email, password);
-    navigate('/dashboard');
-  };
-
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-slate-900">
       {/* Background — dark film studio atmosphere */}
@@ -25,95 +12,45 @@ export default function LoginScreen() {
         }}
       />
 
-      {/* Login Card */}
-      <div className="relative z-10 w-full max-w-sm mx-4">
-        <div
-          className="rounded-2xl p-8 shadow-2xl"
-          style={{ background: 'rgba(15,20,30,0.85)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.08)' }}
-        >
-          {/* Title */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white leading-tight">
-              Pocket
-              <br />
-              Productions
-            </h1>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">
-              Enter the Creative Workspace
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-                Username or Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="director@pocketproductions.com"
-                className="w-full rounded-lg px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full rounded-lg px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
-              />
-            </div>
-
-            {/* Remember / Forgot */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-600 text-blue-500 focus:ring-blue-500"
-                  style={{ background: 'transparent' }}
-                />
-                <span className="text-sm text-slate-300">Remember Me</span>
-              </label>
-              <button type="button" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                Forgot Password?
-              </button>
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              className="w-full py-4 rounded-xl font-bold text-sm text-white transition-all hover:brightness-110 active:scale-[0.98]"
-              style={{ background: 'linear-gradient(to right, #3b82f6, #2563eb)', boxShadow: '0 8px 20px rgba(59,130,246,0.4)' }}
-            >
-              Sign In
-            </button>
-          </form>
-
-          {/* Sign up */}
-          <p className="text-center text-sm text-slate-400 mt-6">
-            New to the studio?{' '}
-            <button
-              onClick={() => navigate('/signup')}
-              className="text-white font-bold hover:text-blue-300 transition-colors"
-            >
-              Create Profile
-            </button>
+      <div className="relative z-10 w-full flex flex-col items-center px-4">
+        {/* Title */}
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-white leading-tight">
+            Pocket
+            <br />
+            Productions
+          </h1>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">
+            Enter the Creative Workspace
           </p>
         </div>
 
-        {/* Version tag */}
+        <SignIn
+          routing="hash"
+          forceRedirectUrl="/dashboard"
+          signUpUrl="/signup"
+          appearance={{
+              variables: {
+              colorPrimary: '#3b82f6',
+              colorBackground: 'rgba(15,20,30,0.92)',
+              colorText: '#ffffff',
+              colorTextSecondary: '#94a3b8',
+              colorInputBackground: 'rgba(255,255,255,0.07)',
+              colorInputText: '#ffffff',
+              borderRadius: '0.75rem',
+              fontFamily: "'Public Sans', sans-serif",
+            },
+            elements: {
+              card: 'shadow-2xl backdrop-blur-xl border border-white/10',
+              headerTitle: 'hidden',
+              headerSubtitle: 'hidden',
+              socialButtonsBlockButton: 'border-white/10 text-slate-300 hover:bg-white/5',
+              formButtonPrimary: 'bg-gradient-to-r from-blue-500 to-blue-600 hover:brightness-110',
+              footerActionLink: 'text-blue-400 hover:text-blue-300',
+            },
+          }}
+        />
+
         <p className="text-[10px] font-mono text-slate-600 uppercase tracking-widest mt-4 text-center">
           Terminal Access 1.0.4 // Production Mode
         </p>

@@ -88,11 +88,18 @@ export default function LandingPage() {
             </button>
           )}
           <button
-            onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 rounded-lg text-sm font-black text-white transition-colors"
+            onClick={() => navigate('/login')}
+            className="px-4 py-2 rounded-lg text-sm font-bold text-slate-300 border transition-colors hover:text-white"
+            style={{ borderColor: 'rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)' }}
+          >
+            Sign In
+          </button>
+          <button
+            onClick={() => navigate('/signup')}
+            className="px-4 py-2 rounded-lg text-sm font-black text-white transition-colors hover:brightness-110"
             style={{ background: 'linear-gradient(135deg, #257bf4, #1a4ed8)' }}
           >
-            Open App
+            Get Started
           </button>
         </div>
       </header>
@@ -136,7 +143,7 @@ export default function LandingPage() {
             {isMobile ? 'Add to Home Screen' : 'Install on Phone'}
           </button>
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/login')}
             className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold text-white border transition-all hover:bg-white/5"
             style={{ borderColor: 'rgba(255,255,255,0.15)' }}
           >
@@ -390,7 +397,7 @@ export default function LandingPage() {
               Add to Home Screen
             </button>
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/login')}
               className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-sm text-white border transition-all hover:bg-white/5"
               style={{ borderColor: 'rgba(255,255,255,0.15)' }}
             >

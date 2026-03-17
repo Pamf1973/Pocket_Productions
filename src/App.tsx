@@ -51,7 +51,7 @@ export default function App() {
           path="/dashboard"
           element={
             <DeviceRoute
-              mobile={<MobileDashboard />}
+              mobile={<ProtectedRoute><MobileDashboard /></ProtectedRoute>}
               desktop={<ProtectedRoute><DesktopDashboard /></ProtectedRoute>}
             />
           }
@@ -62,7 +62,7 @@ export default function App() {
           path="/assets"
           element={
             <DeviceRoute
-              mobile={<HomeScreen />}
+              mobile={<ProtectedRoute><HomeScreen /></ProtectedRoute>}
               desktop={<ProtectedRoute><DesktopAssets /></ProtectedRoute>}
             />
           }
@@ -73,22 +73,22 @@ export default function App() {
           path="/calendar-desktop"
           element={
             <DeviceRoute
-              mobile={<ScheduleScreen />}
+              mobile={<ProtectedRoute><ScheduleScreen /></ProtectedRoute>}
               desktop={<ProtectedRoute><DesktopCalendar /></ProtectedRoute>}
             />
           }
         />
 
-        {/* Mobile-only pages */}
-        <Route path="/home" element={<HomeScreen />} />
-        <Route path="/budget" element={<BudgetScreen />} />
-        <Route path="/schedule" element={<ScheduleScreen />} />
-        <Route path="/nexus" element={<NexusOpsScreen />} />
-        <Route path="/scout" element={<ScoutNoir />} />
-        <Route path="/new-project" element={<NewProjectScreen />} />
-        <Route path="/projects" element={<StudioOpsScreen />} />
-        <Route path="/storyboard" element={<StoryboardStudioScreen />} />
-        <Route path="/crew" element={<CrewOpsScreen />} />
+        {/* Mobile-only pages (auth-gated) */}
+        <Route path="/home" element={<ProtectedRoute><HomeScreen /></ProtectedRoute>} />
+        <Route path="/budget" element={<ProtectedRoute><BudgetScreen /></ProtectedRoute>} />
+        <Route path="/schedule" element={<ProtectedRoute><ScheduleScreen /></ProtectedRoute>} />
+        <Route path="/nexus" element={<ProtectedRoute><NexusOpsScreen /></ProtectedRoute>} />
+        <Route path="/scout" element={<ProtectedRoute><ScoutNoir /></ProtectedRoute>} />
+        <Route path="/new-project" element={<ProtectedRoute><NewProjectScreen /></ProtectedRoute>} />
+        <Route path="/projects" element={<ProtectedRoute><StudioOpsScreen /></ProtectedRoute>} />
+        <Route path="/storyboard" element={<ProtectedRoute><StoryboardStudioScreen /></ProtectedRoute>} />
+        <Route path="/crew" element={<ProtectedRoute><CrewOpsScreen /></ProtectedRoute>} />
 
         {/* Desktop-only pages (auth-gated) */}
         <Route path="/budgets" element={<ProtectedRoute><DesktopBudgets /></ProtectedRoute>} />

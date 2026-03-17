@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSession, signOut } from '../../utils/auth';
+import { useUser, useClerk } from '@clerk/clerk-react';
+import BottomNav from '../../components/BottomNav';
 
 const QUICK_ACTIONS = [
   { icon: 'layers', label: 'Assets', route: '/home' },
@@ -29,15 +30,19 @@ const ACTIVITY = [
 
 export default function MobileDashboard() {
   const navigate = useNavigate();
-  const session = getSession();
+  const { user } = useUser();
+  const { signOut } = useClerk();
   const [showProfile, setShowProfile] = useState(false);
-  const initials = session?.name
-    ? session.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
-    : 'PP';
+  const fullName = user?.fullName ?? user?.firstName ?? 'Producer';
+  const initials = fullName
+    .split(' ')
+    .map((w: string) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   const handleSignOut = () => {
-    signOut();
-    navigate('/login');
+    signOut(() => navigate('/login'));
   };
 
   return (
@@ -53,10 +58,10 @@ export default function MobileDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-              {session?.role ?? 'Production'}
+              Production
             </p>
             <h1 className="text-xl font-black text-white leading-tight">
-              Hey, {session?.name?.split(' ')[0] ?? 'Producer'} 👋
+              Hey, {user?.firstName ?? fullName.split(' ')[0]} 👋
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -188,10 +193,10 @@ export default function MobileDashboard() {
                 {initials}
               </div>
               <div>
-                <p className="text-white font-bold text-base">{session?.name ?? 'Producer'}</p>
-                <p className="text-slate-400 text-sm">{session?.email ?? ''}</p>
+                <p className="text-white font-bold text-base">{fullName}</p>
+                <p className="text-slate-400 text-sm">{user?.primaryEmailAddress?.emailAddress ?? ''}</p>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400">
-                  {session?.role ?? 'Executive Producer'}
+                  Executive Producer
                 </span>
               </div>
             </div>
@@ -217,38 +222,7 @@ export default function MobileDashboard() {
         </>
       )}
 
-      {/* Bottom navigation */}
-      <nav
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-6 pb-8 pt-3 flex justify-around items-center z-20"
-        style={{ background: 'rgba(10,15,26,0.95)', backdropFilter: 'blur(12px)', borderTop: '1px solid rgba(255,255,255,0.06)' }}
-      >
-        {[
-          { icon: 'grid_view', label: 'Dashboard', route: '/dashboard', active: true },
-          { icon: 'layers', label: 'Assets', route: '/home', active: false },
-          { icon: 'payments', label: 'Budget', route: '/budget', active: false },
-          { icon: 'calendar_month', label: 'Schedule', route: '/schedule', active: false },
-          { icon: 'group', label: 'Crew', route: '/crew', active: false },
-        ].map((item) => (
-          <button
-            key={item.label}
-            onClick={() => navigate(item.route)}
-            className="flex flex-col items-center gap-1"
-          >
-            <span
-              className="material-symbols-outlined text-[22px]"
-              style={{ color: item.active ? '#ec5b13' : 'rgba(255,255,255,0.3)' }}
-            >
-              {item.icon}
-            </span>
-            <span
-              className="text-[9px] font-bold uppercase tracking-wider"
-              style={{ color: item.active ? '#ec5b13' : 'rgba(255,255,255,0.3)' }}
-            >
-              {item.label}
-            </span>
-          </button>
-        ))}
-      </nav>
+      <BottomNav />
     </div>
   );
 }

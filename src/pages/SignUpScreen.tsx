@@ -1,24 +1,6 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { signUp } from '../utils/auth';
+import { SignUp } from '@clerk/clerk-react';
 
 export default function SignUpScreen() {
-  const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !email.trim() || !password.trim()) {
-      setError('Please fill in all fields.');
-      return;
-    }
-    signUp(name, email, password);
-    navigate('/dashboard');
-  };
-
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-slate-900">
       <div
@@ -29,86 +11,44 @@ export default function SignUpScreen() {
         }}
       />
 
-      <div className="relative z-10 w-full max-w-sm mx-4">
-        <div
-          className="rounded-2xl p-8 shadow-2xl"
-          style={{ background: 'rgba(15,20,30,0.9)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.08)' }}
-        >
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white leading-tight">
-              Create<br />Profile
-            </h1>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">
-              Join Pocket Productions
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Alex Rivera"
-                className="w-full rounded-lg px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="director@pocketproductions.com"
-                className="w-full rounded-lg px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full rounded-lg px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
-              />
-            </div>
-
-            {error && (
-              <p className="text-xs text-red-400 font-medium">{error}</p>
-            )}
-
-            <button
-              type="submit"
-              className="w-full py-4 rounded-xl font-bold text-sm text-white transition-all hover:brightness-110 active:scale-[0.98]"
-              style={{ background: 'linear-gradient(to right, #3b82f6, #2563eb)', boxShadow: '0 8px 20px rgba(59,130,246,0.4)' }}
-            >
-              Create Profile
-            </button>
-          </form>
-
-          <p className="text-center text-sm text-slate-400 mt-6">
-            Already have an account?{' '}
-            <button
-              onClick={() => navigate('/login')}
-              className="text-white font-bold hover:text-blue-300 transition-colors"
-            >
-              Sign In
-            </button>
+      <div className="relative z-10 w-full flex flex-col items-center px-4">
+        {/* Title */}
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-white leading-tight">
+            Create
+            <br />
+            Profile
+          </h1>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">
+            Join Pocket Productions
           </p>
         </div>
+
+        <SignUp
+          routing="hash"
+          forceRedirectUrl="/dashboard"
+          signInUrl="/login"
+          appearance={{
+              variables: {
+              colorPrimary: '#3b82f6',
+              colorBackground: 'rgba(15,20,30,0.92)',
+              colorText: '#ffffff',
+              colorTextSecondary: '#94a3b8',
+              colorInputBackground: 'rgba(255,255,255,0.07)',
+              colorInputText: '#ffffff',
+              borderRadius: '0.75rem',
+              fontFamily: "'Public Sans', sans-serif",
+            },
+            elements: {
+              card: 'shadow-2xl backdrop-blur-xl border border-white/10',
+              headerTitle: 'hidden',
+              headerSubtitle: 'hidden',
+              socialButtonsBlockButton: 'border-white/10 text-slate-300 hover:bg-white/5',
+              formButtonPrimary: 'bg-gradient-to-r from-blue-500 to-blue-600 hover:brightness-110',
+              footerActionLink: 'text-blue-400 hover:text-blue-300',
+            },
+          }}
+        />
 
         <p className="text-[10px] font-mono text-slate-600 uppercase tracking-widest mt-4 text-center">
           Terminal Access 1.0.4 // Production Mode
