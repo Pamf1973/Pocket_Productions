@@ -8,6 +8,7 @@ const envSchema = z.object({
     CLERK_SECRET_KEY: z.string().optional(),
     CLERK_PUBLISHABLE_KEY: z.string().optional(),
     ANTHROPIC_API_KEY: z.string().optional(),
+    OPENAI_API_KEY: z.string().optional(),
     AWS_ACCESS_KEY_ID: z.string().optional(),
     AWS_SECRET_ACCESS_KEY: z.string().optional(),
     AWS_REGION: z.string().default('us-east-1'),

@@ -105,4 +105,20 @@ router.post('/budget-query', async (req: Request, res: Response, next: NextFunct
     }
 });
 
+// POST /api/ai/generate-image — generate a DALL-E 3 storyboard frame image
+router.post('/generate-image', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const Schema = z.object({
+            sceneHeading: z.string().default('EXT. LOCATION - DAY'),
+            description: z.string().min(5),
+            shotType: z.string().default('Wide Shot'),
+            lighting: z.string().default('Natural'),
+            mood: z.string().default('Neutral'),
+        });
+        const params = Schema.parse(req.body);
+        const result = await claudeAIService.generateStoryboardImage(params);
+        res.json(result);
+    } catch (err) { next(err); }
+});
+
 export default router;

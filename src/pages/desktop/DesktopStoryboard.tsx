@@ -97,6 +97,7 @@ export default function DesktopStoryboard() {
   const [activeMode, setActiveMode] = useState<'ai' | 'upload' | 'blank'>('ai');
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imageGenerating, setImageGenerating] = useState<Record<number, boolean>>({});
 
   // Pre-fill script textarea from localStorage if available
   useEffect(() => {
@@ -155,6 +156,31 @@ export default function DesktopStoryboard() {
       setError(err instanceof Error ? err.message : 'Failed to generate shots');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleGenerateImage = async (frame: Frame) => {
+    setImageGenerating((prev) => ({ ...prev, [frame.id]: true }));
+    try {
+      const token = await getToken();
+      if (!token) throw new Error('Not authenticated');
+      const { url } = await apiPost<{ url: string }>(
+        token,
+        '/api/ai/generate-image',
+        {
+          sceneHeading: frame.sceneHeading || 'EXT. LOCATION - DAY',
+          description: frame.description || '',
+          shotType: frame.shotType || 'Wide Shot',
+          lighting: frame.lighting || 'Natural',
+          mood: frame.mood || 'Neutral',
+        }
+      );
+      setFrames((prev) => prev.map((f) => f.id === frame.id ? { ...f, imgSrc: url } : f));
+    } catch (err) {
+      // Silent fail — user can retry
+      console.error('Image generation failed:', err);
+    } finally {
+      setImageGenerating((prev) => ({ ...prev, [frame.id]: false }));
     }
   };
 
@@ -342,11 +368,27 @@ export default function DesktopStoryboard() {
                       <>
                         {/* AI-generated frames show a scene heading placeholder instead of an image */}
                         {frame.sceneHeading && !frame.imgSrc ? (
-                          <div className="h-32 bg-slate-800/60 flex flex-col items-center justify-center gap-1 px-3">
-                            <span className="material-symbols-outlined text-slate-600 text-3xl">movie</span>
-                            <p className="text-[10px] text-slate-500 text-center font-medium leading-snug">{frame.sceneHeading}</p>
-                            {frame.mood && (
-                              <span className="text-[9px] text-blue-500 font-bold uppercase tracking-widest">{frame.mood}</span>
+                          <div className="h-32 bg-slate-800/60 flex flex-col items-center justify-center gap-2 px-3 relative">
+                            {imageGenerating[frame.id] ? (
+                              <>
+                                <span className="material-symbols-outlined text-blue-400 text-3xl animate-spin">progress_activity</span>
+                                <p className="text-[10px] text-blue-400 font-bold">Generating image…</p>
+                              </>
+                            ) : (
+                              <>
+                                <span className="material-symbols-outlined text-slate-600 text-3xl">movie</span>
+                                <p className="text-[10px] text-slate-500 text-center font-medium leading-snug">{frame.sceneHeading}</p>
+                                {frame.mood && (
+                                  <span className="text-[9px] text-blue-500 font-bold uppercase tracking-widest">{frame.mood}</span>
+                                )}
+                                <button
+                                  onClick={() => handleGenerateImage(frame)}
+                                  className="absolute bottom-2 right-2 flex items-center gap-1 bg-blue-600/80 hover:bg-blue-500 text-white text-[9px] font-bold px-2 py-1 rounded-lg transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-[12px]">auto_awesome</span>
+                                  Generate Image
+                                </button>
+                              </>
                             )}
                           </div>
                         ) : (

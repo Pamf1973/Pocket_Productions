@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { env } from '../config/env';
 
 let client: Anthropic | null = null;
@@ -11,6 +12,17 @@ function getClient(): Anthropic {
         client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
     }
     return client;
+}
+
+let openaiClient: OpenAI | null = null;
+function getOpenAIClient(): OpenAI {
+    if (!openaiClient) {
+        if (!env.OPENAI_API_KEY) {
+            throw new Error('OPENAI_API_KEY is not configured. Add it to Railway environment variables.');
+        }
+        openaiClient = new OpenAI({ apiKey: env.OPENAI_API_KEY });
+    }
+    return openaiClient;
 }
 
 const MODEL = 'claude-sonnet-4-20250514';
@@ -403,6 +415,55 @@ Respond as JSON only, no markdown fences:
                 suggestions: [],
             };
         }
+    }
+    /**
+     * Generates a cinematic storyboard image using DALL-E 3.
+     * First uses Claude to craft the ideal image prompt, then calls DALL-E 3.
+     */
+    async generateStoryboardImage(params: {
+        sceneHeading: string;
+        description: string;
+        shotType: string;
+        lighting: string;
+        mood: string;
+    }): Promise<{ url: string }> {
+        const { sceneHeading, description, shotType, lighting, mood } = params;
+
+        // Step 1: Use Claude to craft a tight DALL-E 3 image prompt
+        const promptResponse = await getClient().messages.create({
+            model: MODEL,
+            max_tokens: 200,
+            messages: [{
+                role: 'user',
+                content: `You are a storyboard artist creating a prompt for DALL-E 3 to generate a cinematic storyboard panel.
+
+Scene: ${sceneHeading}
+Shot type: ${shotType}
+Lighting: ${lighting}
+Mood: ${mood}
+Visual description: ${description}
+
+Write a single DALL-E 3 image prompt (max 150 words) that captures this as a black-and-white or desaturated cinematic storyboard sketch/illustration. Start with "Cinematic storyboard panel," — no quotes, no explanation, just the prompt.`,
+            }],
+        });
+
+        const imagePrompt = promptResponse.content[0].type === 'text'
+            ? promptResponse.content[0].text.trim()
+            : `Cinematic storyboard panel, ${shotType}, ${sceneHeading}, ${lighting} lighting, ${mood} mood, black and white film noir illustration`;
+
+        // Step 2: Generate image with DALL-E 3
+        const imageResponse = await getOpenAIClient().images.generate({
+            model: 'dall-e-3',
+            prompt: imagePrompt,
+            n: 1,
+            size: '1792x1024',
+            quality: 'standard',
+            style: 'vivid',
+        });
+
+        const url = imageResponse.data[0]?.url;
+        if (!url) throw new Error('DALL-E 3 returned no image URL');
+        return { url };
     }
 }
 
