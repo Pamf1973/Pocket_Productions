@@ -8,6 +8,7 @@ import LoginScreen from './pages/LoginScreen';
 import SignUpScreen from './pages/SignUpScreen';
 import ProtectedRoute from './components/ProtectedRoute';
 import DeviceRoute from './components/DeviceRoute';
+import UpdateBanner from './components/UpdateBanner';
 
 // Mobile pages
 import MobileDashboard from './pages/mobile/MobileDashboard';
@@ -37,6 +38,7 @@ import DesktopSettings from './pages/desktop/DesktopSettings';
 export default function App() {
   return (
     <BrowserRouter>
+      <UpdateBanner />
       <Routes>
         {/* Auth */}
         <Route path="/login" element={<LoginScreen />} />
