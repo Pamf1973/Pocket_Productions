@@ -305,8 +305,25 @@ export default function PWAInstallScreen() {
               ADD TO HOME SCREEN
             </button>
           ) : (
-            <div className="text-center py-4 text-sm" style={{ color: '#8E8E93' }}>
-              <p>Open this page in Chrome to install the app.</p>
+            <div className="space-y-3">
+              <p className="text-center text-xs font-bold uppercase tracking-widest mb-4" style={{ color: '#8E8E93' }}>
+                Manual Install — Chrome
+              </p>
+              {[
+                { step: '1', icon: 'more_vert', text: 'Tap the ⋮ menu in the top-right corner of Chrome' },
+                { step: '2', icon: 'add_to_home_screen', text: 'Tap "Add to Home screen"' },
+                { step: '3', icon: 'check_circle', text: 'Tap "Add" — the icon will appear on your home screen' },
+              ].map((item) => (
+                <div key={item.step} className="flex items-center gap-3 p-3 rounded-2xl"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
+                    style={{ background: '#00B2FF', color: '#000' }}>
+                    {item.step}
+                  </span>
+                  <span className="material-symbols-outlined text-[20px] shrink-0" style={{ color: '#00B2FF' }}>{item.icon}</span>
+                  <p className="text-xs text-white leading-snug">{item.text}</p>
+                </div>
+              ))}
             </div>
           )}
         </div>
