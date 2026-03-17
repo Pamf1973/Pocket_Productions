@@ -22,6 +22,7 @@ import NewProjectScreen from './pages/mobile/NewProjectScreen';
 import StudioOpsScreen from './pages/mobile/StudioOpsScreen';
 import StoryboardStudioScreen from './pages/mobile/StoryboardStudioScreen';
 import CrewOpsScreen from './pages/mobile/CrewOpsScreen';
+import MobileSettings from './pages/mobile/MobileSettings';
 import PWAInstallScreen from './pages/mobile/PWAInstallScreen';
 
 // Desktop pages
@@ -93,6 +94,7 @@ export default function App() {
         <Route path="/projects" element={<ProtectedRoute><StudioOpsScreen /></ProtectedRoute>} />
         <Route path="/storyboard" element={<ProtectedRoute><StoryboardStudioScreen /></ProtectedRoute>} />
         <Route path="/crew" element={<ProtectedRoute><CrewOpsScreen /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><MobileSettings /></ProtectedRoute>} />
 
         {/* Desktop-only pages (auth-gated) */}
         <Route path="/budgets" element={<ProtectedRoute><DesktopBudgets /></ProtectedRoute>} />

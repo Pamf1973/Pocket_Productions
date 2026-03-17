@@ -202,7 +202,7 @@ export default function MobileDashboard() {
             </div>
             <div className="space-y-2 mb-6">
               <button
-                onClick={() => { setShowProfile(false); navigate('/settings-desktop'); }}
+                onClick={() => { setShowProfile(false); navigate('/settings'); }}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-300 hover:text-white transition-colors"
                 style={{ background: 'rgba(255,255,255,0.05)' }}
               >
