@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { claudeAIService } from '../services/ClaudeAIService';
+import { prisma } from '../lib/prisma';
 
 const router = Router();
 
@@ -118,6 +119,114 @@ router.post('/generate-image', async (req: Request, res: Response, next: NextFun
         const params = Schema.parse(req.body);
         const result = await claudeAIService.generateStoryboardImage(params);
         res.json(result);
+    } catch (err) { next(err); }
+});
+
+// Category map — Claude categories → Prisma BudgetCategory enum
+const CATEGORY_TO_DB: Record<string, 'ABOVE_THE_LINE' | 'BTL_PRODUCTION' | 'BTL_POST' | 'OTHER_DIRECT'> = {
+  Cast: 'ABOVE_THE_LINE',
+  Crew: 'BTL_PRODUCTION',
+  Locations: 'BTL_PRODUCTION',
+  Equipment: 'BTL_PRODUCTION',
+  Post: 'BTL_POST',
+  Misc: 'OTHER_DIRECT',
+};
+
+// POST /api/ai/analyze-and-save — analyze script and persist budget + storyboard shots to a project
+router.post('/analyze-and-save', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const Schema = z.object({
+            projectId: z.string(),
+            scriptText: z.string().min(50),
+        });
+        const { projectId, scriptText } = Schema.parse(req.body);
+
+        // Verify project belongs to this user
+        const project = await prisma.project.findFirst({
+            where: { id: projectId, clerkUserId: req.auth!.userId },
+        });
+        if (!project) {
+            res.status(404).json({ error: 'Project not found' });
+            return;
+        }
+
+        // Analyze with Claude
+        const analysis = await claudeAIService.analyzeScript(scriptText);
+
+        // Clear previous AI-generated storyboard shots for this project
+        await prisma.storyboardShot.deleteMany({ where: { projectId, aiGenerated: true } });
+
+        // Clear previous budget line items for this project (AI-generated ones, identified by notes containing "aiGenerated")
+        await prisma.budgetLineItem.deleteMany({
+            where: {
+                projectId,
+                notes: { contains: '"aiGenerated":true' },
+            },
+        });
+
+        // Bulk-create budget line items
+        let budgetCount = 0;
+        if (analysis.budgetLineItems?.length) {
+            await prisma.budgetLineItem.createMany({
+                data: analysis.budgetLineItems.map((item) => ({
+                    projectId,
+                    category: CATEGORY_TO_DB[item.category] ?? 'OTHER_DIRECT',
+                    description: item.description,
+                    baseAmount: item.total ?? 0,
+                    lineTotal: item.total ?? 0,
+                    notes: JSON.stringify({
+                        aiGenerated: true,
+                        qty: item.qty,
+                        rate: item.rate,
+                        flag: item.flag ?? null,
+                        originalCategory: item.category,
+                    }),
+                })),
+            });
+            budgetCount = analysis.budgetLineItems.length;
+        }
+
+        // Bulk-create storyboard shots
+        let shotCount = 0;
+        if (analysis.storyboardShots?.length) {
+            await prisma.storyboardShot.createMany({
+                data: analysis.storyboardShots.map((shot, i) => ({
+                    projectId,
+                    sceneNumber: shot.sceneHeading || `Scene ${i + 1}`,
+                    shotNumber: i + 1,
+                    shotType: shot.shotType || 'Wide',
+                    description: shot.description,
+                    aiGenerated: true,
+                    aiPrompt: shot.sceneHeading,
+                    order: i,
+                    notes: JSON.stringify({
+                        frameLabel: shot.frameLabel,
+                        cameraMovement: shot.cameraMovement,
+                        lighting: shot.lighting,
+                        mood: shot.mood,
+                    }),
+                })),
+            });
+            shotCount = analysis.storyboardShots.length;
+        }
+
+        // Update project logline if we got a better summary
+        if (analysis.summary) {
+            await prisma.project.update({
+                where: { id: projectId },
+                data: { logline: analysis.summary },
+            });
+        }
+
+        res.json({
+            budgetCount,
+            shotCount,
+            title: analysis.title,
+            summary: analysis.summary,
+            estimatedDays: analysis.estimatedDays,
+            cast: analysis.cast,
+            locations: analysis.locations,
+        });
     } catch (err) { next(err); }
 });
 

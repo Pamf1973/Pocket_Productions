@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import DesktopLayout from '../../components/DesktopLayout';
-import { apiPost } from '../../utils/api';
+import { apiPost, apiGet } from '../../utils/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,6 +33,23 @@ interface AiShot {
   lighting: string;
   description: string;
   mood: string;
+}
+
+interface ProjectOption {
+  id: string;
+  title: string;
+}
+
+interface DbShot {
+  id: string;
+  sceneNumber: string;
+  shotNumber: number;
+  shotType: string;
+  description: string;
+  aiGenerated: boolean;
+  aiPrompt: string | null;
+  order: number;
+  notes: string | null;
 }
 
 // ─── Seed data ────────────────────────────────────────────────────────────────
@@ -98,6 +115,75 @@ export default function DesktopStoryboard() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageGenerating, setImageGenerating] = useState<Record<number, boolean>>({});
+
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(
+    localStorage.getItem('pp_current_project_id')
+  );
+  const [projectOptions, setProjectOptions] = useState<ProjectOption[]>([]);
+
+  // Load project list
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const projects = await apiGet<ProjectOption[]>(token, '/api/projects');
+        setProjectOptions(projects);
+        if (!currentProjectId && projects.length > 0) {
+          setCurrentProjectId(projects[0].id);
+          localStorage.setItem('pp_current_project_id', projects[0].id);
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [getToken]);
+
+  // Load shots from DB when project changes
+  useEffect(() => {
+    if (!currentProjectId) return;
+    (async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const shots = await apiGet<DbShot[]>(
+          token,
+          `/api/storyboard/shots?projectId=${currentProjectId}`
+        );
+        if (shots.length > 0) {
+          const mapped: Frame[] = shots.map((shot) => {
+            let frameLabel = `FRAME ${shot.shotNumber}`;
+            let cameraMovement = '';
+            let lighting = '';
+            let mood = '';
+            try {
+              const parsed = JSON.parse(shot.notes ?? '{}');
+              frameLabel = parsed.frameLabel || frameLabel;
+              cameraMovement = parsed.cameraMovement || '';
+              lighting = parsed.lighting || '';
+              mood = parsed.mood || '';
+            } catch { /* ignore */ }
+            return {
+              id: shot.shotNumber,
+              label: frameLabel,
+              hasContent: true,
+              sceneHeading: shot.sceneNumber,
+              description: shot.description,
+              shotType: shot.shotType,
+              cameraMovement,
+              lighting,
+              mood,
+              camera: 'Cam 1',
+              shotSize: 'WS',
+              equipment: 'Steadicam',
+              lens: 'Standard',
+              frameRate: '24 fps',
+              vfx: '—',
+            };
+          });
+          setFrames(mapped);
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [currentProjectId, getToken]);
 
   // Pre-fill script textarea from localStorage if available
   useEffect(() => {
@@ -203,8 +289,29 @@ export default function DesktopStoryboard() {
         <div className="flex flex-1 flex-col overflow-hidden bg-slate-950">
           {/* Project header */}
           <div className="shrink-0 flex flex-wrap items-center justify-between gap-4 p-6 border-b border-blue-600/10 bg-transparent">
-            <div>
-              <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">Project: Nightfall</span>
+            <div className="flex flex-col gap-1">
+              {projectOptions.length > 0 ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-blue-400 uppercase tracking-widest shrink-0">Project:</span>
+                  <div className="relative">
+                    <select
+                      value={currentProjectId ?? ''}
+                      onChange={(e) => {
+                        setCurrentProjectId(e.target.value);
+                        localStorage.setItem('pp_current_project_id', e.target.value);
+                      }}
+                      className="bg-transparent border border-blue-600/20 rounded-lg pl-2 pr-6 py-0.5 text-xs font-bold text-blue-300 outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
+                    >
+                      {projectOptions.map((p) => (
+                        <option key={p.id} value={p.id} className="bg-slate-900 text-slate-200">{p.title}</option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-1 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none text-[14px]">expand_more</span>
+                  </div>
+                </div>
+              ) : (
+                <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">Storyboard</span>
+              )}
               <h1 className="text-2xl font-black leading-tight">Scene 1: The Rain-Slicked Alley</h1>
             </div>
             <div className="flex gap-3">

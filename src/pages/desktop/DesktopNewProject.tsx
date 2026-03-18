@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import DesktopLayout from '../../components/DesktopLayout';
-import { apiPost } from '../../utils/api';
+import { apiPost, apiGet } from '../../utils/api';
 import { extractScriptText } from '../../utils/extractScriptText';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -82,6 +82,9 @@ export default function DesktopNewProject() {
   // ── Locations
   const [locations, setLocations] = useState<LocationEntry[]>([]);
 
+  // ── Analyzed script text (raw)
+  const [analyzedScriptText, setAnalyzedScriptText] = useState<string>('');
+
   // ── Script Upload
   const [scriptLoading, setScriptLoading] = useState(false);
   const [scriptResult, setScriptResult] = useState<ScriptAnalysis | null>(null);
@@ -99,6 +102,7 @@ export default function DesktopNewProject() {
       const token = await getToken();
       if (!token) throw new Error('Not authenticated');
       const scriptText = await extractScriptText(file, token);
+      setAnalyzedScriptText(scriptText);
       const { result } = await apiPost<{ result: ScriptAnalysis }>(
         token,
         '/api/ai/analyze-script',
@@ -176,7 +180,9 @@ export default function DesktopNewProject() {
     try {
       const token = await getToken();
       if (!token) throw new Error('Not authenticated');
-      await apiPost(token, '/api/projects', {
+
+      // Step 1: Create the project
+      const project = await apiPost<{ id: string }>(token, '/api/projects', {
         title: title || 'Untitled Project',
         format: projectType,
         genre: genre || undefined,
@@ -187,6 +193,18 @@ export default function DesktopNewProject() {
           director, dp, producer, cast, crew, locations,
         }),
       });
+
+      // Step 2: Save project as current
+      localStorage.setItem('pp_current_project_id', project.id);
+
+      // Step 3: If a script was uploaded, analyze and save budget + storyboard to this project
+      if (analyzedScriptText) {
+        await apiPost(token, '/api/ai/analyze-and-save', {
+          projectId: project.id,
+          scriptText: analyzedScriptText,
+        });
+      }
+
       navigate('/projects-desktop');
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to create project');

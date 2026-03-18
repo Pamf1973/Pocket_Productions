@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import DesktopLayout from '../../components/DesktopLayout';
 import { apiPost } from '../../utils/api';
-import { extractScriptText } from '../../utils/extractScriptText';
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 
@@ -54,6 +53,7 @@ interface QuickAnalysis {
   pageCount: number;
   sceneCount: number;
   estimatedDays: number;
+  summary?: string;
   budgetLineItems: Array<{ total: number }>;
 }
 
@@ -77,9 +77,11 @@ export default function DesktopDashboard() {
     setScriptError(null);
     setScriptResult(null);
     try {
+      const scriptText = await file.text();
       const token = await getToken();
       if (!token) throw new Error('Not authenticated');
-      const scriptText = await extractScriptText(file, token);
+
+      // Step 1: Analyze the script
       const { result } = await apiPost<{ result: QuickAnalysis }>(
         token,
         '/api/ai/analyze-script',
@@ -87,6 +89,25 @@ export default function DesktopDashboard() {
       );
       setScriptResult(result);
       localStorage.setItem('pp_last_script_analysis', JSON.stringify(result));
+
+      // Step 2: Auto-create a project for this script
+      try {
+        const project = await apiPost<{ id: string }>(token, '/api/projects', {
+          title: result.title || 'Untitled Project',
+          format: 'Feature Film',
+          totalBudget: result.budgetLineItems?.reduce((s: number, i: { total: number }) => s + i.total, 0) || 10000,
+          logline: result.summary || undefined,
+        });
+
+        // Step 3: Save budget + storyboard shots to the new project
+        localStorage.setItem('pp_current_project_id', project.id);
+        await apiPost(token, '/api/ai/analyze-and-save', {
+          projectId: project.id,
+          scriptText,
+        });
+      } catch {
+        // Non-fatal — script analysis still showed, just couldn't auto-save to project
+      }
     } catch (err) {
       setScriptError(err instanceof Error ? err.message : 'Analysis failed');
     } finally {

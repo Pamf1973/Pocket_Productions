@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import DesktopLayout from '../../components/DesktopLayout';
-import { apiPost } from '../../utils/api';
+import { apiPost, apiGet } from '../../utils/api';
 import { extractScriptText } from '../../utils/extractScriptText';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -49,6 +49,20 @@ interface ScriptAnalysis {
 interface AiResponse {
   answer: string;
   suggestions: Array<{ action: string; description: string; impact: string }>;
+}
+
+interface DbLineItem {
+  id: string;
+  category: string;
+  description: string;
+  baseAmount: number;
+  lineTotal: number;
+  notes: string | null;
+}
+
+interface ProjectOption {
+  id: string;
+  title: string;
 }
 
 // ─── Demo seed data ───────────────────────────────────────────────────────────
@@ -101,6 +115,70 @@ export default function DesktopBudgets() {
   const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(
+    localStorage.getItem('pp_current_project_id')
+  );
+  const [projectOptions, setProjectOptions] = useState<ProjectOption[]>([]);
+  const [projectLoading, setProjectLoading] = useState(false);
+
+  // Load project list
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const projects = await apiGet<ProjectOption[]>(token, '/api/projects');
+        setProjectOptions(projects);
+        // If no current project is set but projects exist, use the first one
+        if (!currentProjectId && projects.length > 0) {
+          setCurrentProjectId(projects[0].id);
+          localStorage.setItem('pp_current_project_id', projects[0].id);
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [getToken]);
+
+  // Load budget items when project changes
+  useEffect(() => {
+    if (!currentProjectId) return;
+    (async () => {
+      setProjectLoading(true);
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const items = await apiGet<DbLineItem[]>(
+          token,
+          `/api/budget/line-items?projectId=${currentProjectId}`
+        );
+        if (items.length > 0) {
+          const mapped: BudgetRow[] = items.map((item) => {
+            let qty = 1, rate = item.lineTotal, flag: string | undefined;
+            let originalCategory: Category = 'Misc';
+            try {
+              const parsed = JSON.parse(item.notes ?? '{}');
+              qty = parsed.qty ?? 1;
+              rate = parsed.rate ?? item.lineTotal;
+              flag = parsed.flag ?? undefined;
+              originalCategory = (parsed.originalCategory as Category) ?? 'Misc';
+            } catch { /* ignore */ }
+            return {
+              id: item.id,
+              category: originalCategory,
+              description: item.description,
+              qty,
+              rate,
+              total: item.lineTotal,
+              flag,
+            };
+          });
+          setLineItems(mapped);
+        }
+      } catch { /* ignore */ } finally {
+        setProjectLoading(false);
+      }
+    })();
+  }, [currentProjectId, getToken]);
 
   // ── Script import ──────────────────────────────────────────────────────────
 
@@ -263,6 +341,32 @@ export default function DesktopBudgets() {
             <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-200">
               <span className="material-symbols-outlined text-[16px]">close</span>
             </button>
+          </div>
+        )}
+
+        {/* ── Project Selector bar ── */}
+        {projectOptions.length > 0 && (
+          <div className="rounded-xl bg-slate-900/60 border border-white/5 px-4 py-3 flex items-center gap-3">
+            <span className="material-symbols-outlined text-slate-400 text-[18px]">folder_open</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0">Project</span>
+            <div className="relative flex-1 max-w-xs">
+              <select
+                value={currentProjectId ?? ''}
+                onChange={(e) => {
+                  setCurrentProjectId(e.target.value);
+                  localStorage.setItem('pp_current_project_id', e.target.value);
+                }}
+                className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-slate-200 outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
+              >
+                {projectOptions.map((p) => (
+                  <option key={p.id} value={p.id}>{p.title}</option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-[16px]">expand_more</span>
+            </div>
+            {projectLoading && (
+              <span className="material-symbols-outlined text-blue-400 text-[16px] animate-spin">progress_activity</span>
+            )}
           </div>
         )}
 
