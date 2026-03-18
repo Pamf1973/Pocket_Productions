@@ -98,7 +98,7 @@ export default function DesktopLayout({ children, headerCenter, headerRight }: P
         {/* Bottom actions */}
         <div className="p-3 border-t border-white/5 space-y-1">
           <button
-            onClick={() => navigate('/install')}
+            onClick={() => navigate('/install-desktop')}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">install_mobile</span>
@@ -215,7 +215,7 @@ export default function DesktopLayout({ children, headerCenter, headerRight }: P
                       Settings
                     </button>
                     <button
-                      onClick={() => { setDropdownOpen(false); navigate('/install'); }}
+                      onClick={() => { setDropdownOpen(false); navigate('/install-desktop'); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
                     >
                       <span className="material-symbols-outlined text-[18px] text-slate-400">install_mobile</span>

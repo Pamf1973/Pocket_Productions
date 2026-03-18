@@ -36,6 +36,7 @@ import DesktopProjects from './pages/desktop/DesktopProjects';
 import DesktopStoryboard from './pages/desktop/DesktopStoryboard';
 import DesktopTeam from './pages/desktop/DesktopTeam';
 import DesktopSettings from './pages/desktop/DesktopSettings';
+import DesktopInstall from './pages/desktop/DesktopInstall';
 
 export default function App() {
   return (
@@ -104,6 +105,7 @@ export default function App() {
         <Route path="/storyboard-desktop" element={<ProtectedRoute><DesktopStoryboard /></ProtectedRoute>} />
         <Route path="/team-desktop" element={<ProtectedRoute><DesktopTeam /></ProtectedRoute>} />
         <Route path="/settings-desktop" element={<ProtectedRoute><DesktopSettings /></ProtectedRoute>} />
+        <Route path="/install-desktop" element={<ProtectedRoute><DesktopInstall /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );
