@@ -4,6 +4,41 @@ import { useAuth } from '@clerk/clerk-react';
 import DesktopLayout from '../../components/DesktopLayout';
 import { apiGet } from '../../utils/api';
 
+// ─── Mock Data ────────────────────────────────────────────────────────────────
+
+const MOCK_PROJECTS: ApiProject[] = [
+  {
+    id: '1', title: 'Nightfall', format: 'Feature Film', genre: 'Thriller',
+    totalBudget: 2400000, sagAgreementTier: 'LOW_BUDGET', logline: 'A detective uncovers a web of corruption that reaches the highest levels of city government — forcing her to choose between justice and survival.',
+    createdAt: '2026-02-01T00:00:00Z', updatedAt: '2026-03-15T00:00:00Z',
+    _count: { phases: 4, persons: 34, characters: 12, locations: 8 },
+  },
+  {
+    id: '2', title: 'Echo Chamber', format: 'Short Film', genre: 'Drama',
+    totalBudget: 85000, sagAgreementTier: 'STUDENT', logline: 'Two estranged siblings reunite over one weekend to settle their late father\'s estate — and old wounds.',
+    createdAt: '2026-01-10T00:00:00Z', updatedAt: '2026-03-10T00:00:00Z',
+    _count: { phases: 3, persons: 11, characters: 4, locations: 3 },
+  },
+  {
+    id: '3', title: 'The Signal', format: 'Feature Film', genre: 'Sci-Fi',
+    totalBudget: 5750000, sagAgreementTier: 'SAG_LOW_BUDGET', logline: 'A satellite engineer intercepts a repeating signal from deep space — and decoding it may cost humanity everything.',
+    createdAt: '2025-11-20T00:00:00Z', updatedAt: '2026-03-17T00:00:00Z',
+    _count: { phases: 5, persons: 62, characters: 18, locations: 14 },
+  },
+  {
+    id: '4', title: 'Parallel Lines', format: 'TV Pilot', genre: 'Crime',
+    totalBudget: 1200000, sagAgreementTier: 'LOW_BUDGET', logline: 'Three strangers connected by a single event must navigate a city that wants them silenced.',
+    createdAt: '2026-02-14T00:00:00Z', updatedAt: '2026-03-12T00:00:00Z',
+    _count: { phases: 2, persons: 28, characters: 9, locations: 6 },
+  },
+  {
+    id: '5', title: 'Golden Hour', format: 'Documentary', genre: 'Documentary',
+    totalBudget: 320000, sagAgreementTier: 'NON_UNION', logline: 'An intimate portrait of three independent farmers fighting to keep their land through a historic drought.',
+    createdAt: '2026-03-01T00:00:00Z', updatedAt: '2026-03-16T00:00:00Z',
+    _count: { phases: 2, persons: 8, characters: 3, locations: 5 },
+  },
+];
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ApiProject {
@@ -36,9 +71,9 @@ export default function DesktopProjects() {
   const { getToken } = useAuth();
 
   const [activeTab, setActiveTab] = useState(TABS[0]);
-  const [projects, setProjects] = useState<ApiProject[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [projects, setProjects] = useState<ApiProject[]>(MOCK_PROJECTS);
+  const [loading, setLoading] = useState(false);
+  const [error] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -46,9 +81,9 @@ export default function DesktopProjects() {
         const token = await getToken();
         if (!token) return;
         const data = await apiGet<ApiProject[]>(token, '/api/projects');
-        setProjects(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load projects');
+        if (data?.length) setProjects(data);
+      } catch {
+        // keep mock data visible on error
       } finally {
         setLoading(false);
       }
