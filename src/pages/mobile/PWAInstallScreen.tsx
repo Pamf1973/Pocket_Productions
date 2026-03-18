@@ -8,20 +8,20 @@ const INSTALL_URL = `${APP_URL}/install`;
 
 function AppQRCode() {
   return (
-    <div
-      className="mx-auto rounded-2xl p-4 flex flex-col items-center gap-3"
-      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', width: 196 }}
-    >
-      <div className="rounded-xl overflow-hidden p-2" style={{ background: '#ffffff' }}>
+    <div className="mx-auto flex flex-col items-center gap-3">
+      <div
+        className="rounded-2xl p-4"
+        style={{ background: '#ffffff', boxShadow: '0 0 40px rgba(0,178,255,0.25)' }}
+      >
         <QRCode
           value={INSTALL_URL}
-          size={148}
+          size={160}
           bgColor="#ffffff"
-          fgColor="#080c14"
+          fgColor="#0a0a14"
           level="M"
         />
       </div>
-      <p className="text-[10px] text-center font-mono break-all" style={{ color: 'rgba(255,255,255,0.5)' }}>
+      <p className="text-[10px] text-center font-mono break-all" style={{ color: 'rgba(255,255,255,0.4)' }}>
         {INSTALL_URL}
       </p>
     </div>
