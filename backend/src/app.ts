@@ -30,7 +30,10 @@ app.use(helmet({
     contentSecurityPolicy: false, // Disable for now to avoid PWA asset issues in dev
 }));
 app.use(cors({
-    origin: env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+        // Dynamically allow the requesting origin to support Vercel preview URLs and local dev
+        callback(null, origin || true);
+    },
     credentials: true,
 }));
 app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
