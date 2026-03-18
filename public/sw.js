@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pocket-productions-v2';
+const CACHE_NAME = 'pocket-productions-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -26,15 +26,17 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Network-first for API calls
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request).catch(() => caches.match(request))
-    );
+  // Never intercept non-GET requests — Cache API only supports GET
+  if (request.method !== 'GET') return;
+
+  // Network-only for API calls (same-origin /api/ or cross-origin Railway backend)
+  const isApi = url.pathname.startsWith('/api/') || url.hostname.includes('railway.app');
+  if (isApi) {
+    event.respondWith(fetch(request));
     return;
   }
 
-  // Cache-first for static assets
+  // Cache-first for static assets (images, fonts)
   if (request.destination === 'image' || request.destination === 'font') {
     event.respondWith(
       caches.match(request).then((cached) => {
@@ -49,11 +51,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Stale-while-revalidate for everything else
+  // Stale-while-revalidate for GET navigation/assets only
   event.respondWith(
     caches.match(request).then((cached) => {
       const networkFetch = fetch(request).then((response) => {
-        if (response.ok) {
+        if (response.ok && response.status < 400) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }
