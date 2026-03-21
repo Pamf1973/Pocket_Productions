@@ -2,6 +2,8 @@
 The SAG-AFTRA Rate-Aware Budget & Creative Powerhouse
 A unified film production platform that bridges the gap between creative development and union-compliant logistics.
 
+Public URL: https://pocket-productions.vercel.app
+
 🚀 View Live Demo
 
 📌 The Problem
